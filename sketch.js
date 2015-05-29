@@ -1,5 +1,5 @@
 var font;
-var snapDistance = 72;
+var snapDistance = 68;
 var textToRender = "p5*js";
 var opFont;
 
