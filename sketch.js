@@ -1,54 +1,80 @@
 var font;
-var snapDistance = 72;
+var snapDistance, snapStrength, snapX, snapY, increment;
 var textToRender = "p5*js";
 var opFont;
 
-function preload(){
-  font = loadFont(opentype, 'font/font.otf');
+function preload() {
+  font = loadFont('font/font.otf');
 }
 
-function setup(){
-  createCanvas(720, 480);
+function setup() {
+  createCanvas(240, 120);
   opFont = font.font;
-  frameRate(24);
+  snapX = 0;
+  snapY = 0;
+  snapDistance = 1;
+  snapStrength = 100;
+  increment = 1;
+  frameRate(30);
+  noCursor();
 }
 
 function draw() {
-  background(237,34,93);
+  background(255); //#ed225d, 237, 34, 93
 
-  if( snapDistance == -25) {
-    snapDistance = 68;
+  var path = opFont.getPath(textToRender, 20, 80, 80, {
+    kerning: true
+  });
+  path.fill = "#ed225d";
+
+  if( mouseX < width && mouseX > 0 && mouseY < height && mouseY > 0 )
+  {
+    if(snapDistance == 1)
+      snapDistance = int(random(14.5, 22.5));
+    if(pmouseX < mouseX){
+      increment = -1;
+    }
+    else if(pmouseX > mouseX){
+      increment = 1;
+    }
+  }
+  else{
+    if( snapDistance > 3){
+        snapDistance -= 3;
+    }
+    else{
+      snapDistance = 1;
+    }
   }
 
-  var path = opFont.getPath(textToRender, 170, 275, 150, {kerning: true});
-  path.fill = "#ffffff";
-  var value = (snapDistance <= 0) ? 1: snapDistance;
-  doSnap(path, value);
+  snapX += increment;
+
+  doSnap(path, snapDistance, snapX, snapY);
   path.draw(this.drawingContext);
-
-  snapDistance --;
 }
 
-function doSnap(path, value) {
-    var i;
-    for (i = 0; i < path.commands.length; i++) {
-        var cmd = path.commands[i];
-        if (cmd.type !== 'Z') {
-            cmd.x = snap(cmd.x, value, 1);
-            cmd.y = snap(cmd.y, value, 1);
-        }
-        if (cmd.type === 'Q' || cmd.type === 'C') {
-            cmd.x1 = snap(cmd.x1, value, 1);
-            cmd.y1 = snap(cmd.y1, value, 1);
-        }
-        if (cmd.type === 'C') {
-            cmd.x2 = snap(cmd.x2, value, 1);
-            cmd.y2 = snap(cmd.y2, value, 1);
-        }
+function doSnap(path, value, x, y) {
+  var i;
+  var strength = snapStrength / 100.0;
+  for (i = 0; i < path.commands.length; i++) {
+    var cmd = path.commands[i];
+    if (cmd.type !== 'Z') {
+      cmd.x = snap(cmd.x + x, value, strength) - x;
+      cmd.y = snap(cmd.y + y, value, strength) - y;
     }
+    if (cmd.type === 'Q' || cmd.type === 'C') {
+      cmd.x1 = snap(cmd.x1 + x, value, strength) - x;
+      cmd.y1 = snap(cmd.y1 + y, value, strength) - y;
+    }
+    if (cmd.type === 'C') {
+      cmd.x2 = snap(cmd.x2 + x, value, strength) - x;
+      cmd.y2 = snap(cmd.y2 + y, value, strength) - y;
+    }
+  }
 }
+
 
 // Round a value to the nearest "step".
 function snap(v, distance, strength) {
-    return (v * (1.0 - strength)) + (strength * Math.round(v / distance) * distance);
+  return (v * (1.0 - strength)) + (strength * Math.round(v / distance) * distance);
 }
