@@ -17,7 +17,6 @@ function setup() {
   noStroke();
   fill(237, 34, 93);
   logoPaths = toAbsoluteSVG(logoJSON);
-
 }
 
 function draw() {
@@ -39,14 +38,22 @@ function draw() {
   }
 
   snapX += increment;
-  var drawData = doSnap(logoPaths, snapDistance, snapX, snapY);
-  drawSVG(drawData);
+
+  if(snapDistance == 1)
+  {
+    drawSVG(logoPaths);
+  }
+  else{
+    var drawData = doSnap(logoPaths, snapDistance, snapX, snapY);
+    drawSVG(drawData);
+  }
 }
 
 function doSnap(data, value, x, y) {
   var i, j, results = [];
   var strength = snapStrength / 100.0;
-  for (i = 0; i < data.length; i++) {
+  // -4 eliminating the word 'BETA'
+  for (i = 0; i < data.length - 4; i++) {
     var path = [];
     for (j = 0; j < data[i].length; j++) {
       var command = {};
@@ -192,6 +199,9 @@ function drawSVG(data) {
           break;
         case 'Z':
           if (j != data[i].length - 1) {
+            if (clipStart) {
+              endContour();
+            }
             beginContour();
             clipStart = true;
           } else {
