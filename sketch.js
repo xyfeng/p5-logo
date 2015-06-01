@@ -1,15 +1,14 @@
-var font;
+var logoJSON;
 var snapDistance, snapStrength, snapX, snapY, increment;
 var textToRender = "p5*js";
 var opFont;
 
 function preload() {
-  font = loadFont('font/font.otf');
+  logoJSON = loadJSON('p5js.json');
 }
 
 function setup() {
   createCanvas(240, 120);
-  opFont = font.font;
   snapX = 0;
   snapY = 0;
   snapDistance = 1;
@@ -17,16 +16,15 @@ function setup() {
   increment = 1;
   frameRate(30);
   noCursor();
+  noStroke();
+
+  background(237, 34, 93); //#ed225d, 237, 34, 93
+
+  fill(255);
+  drawSVGData(logoJSON);
 }
 
 function draw() {
-  background(255); //#ed225d, 237, 34, 93
-
-  var path = opFont.getPath(textToRender, 20, 80, 80, {
-    kerning: true
-  });
-  path.fill = "#ed225d";
-
   if( mouseX < width && mouseX > 0 && mouseY < height && mouseY > 0 )
   {
     if(snapDistance == 1)
@@ -49,8 +47,65 @@ function draw() {
 
   snapX += increment;
 
-  doSnap(path, snapDistance, snapX, snapY);
-  path.draw(this.drawingContext);
+  // doSnap(path, snapDistance, snapX, snapY);
+  // path.draw(this.drawingContext);
+}
+
+function drawSVGData(data)
+{
+  var curX, curY;
+  for( var i=0; i<data.length; i++ ){
+    var one = data[i];
+    switch (one.code) {
+      case 'M':
+        if(i == 0){
+          beginShape();
+        }
+        curX = one.x;
+        curY = one.y;
+        vertex(curX, curY);
+        break;
+      case 'v':
+        curY += one.y;
+        vertex(curX, curY);
+        break;
+      case 'V':
+        curY = one.y;
+        vertex(curX, curY);
+        break;
+      case 'h':
+        curX += one.x;
+        vertex(curX, curY);
+        break;
+      case 'H':
+        curX = one.x;
+        vertex(curX, curY);
+        break;
+      case 'c':
+        bezierVertex(curX+one.x1, curY+one.y1, curX+one.x2, curY+one.y2, curX+=one.x, curY+=one.y);
+        break;
+      case 'C':
+        bezierVertex(one.x1, one.y1, one.x2, one.y2, curX=one.x, curY=one.y);
+        break;
+      case 's':
+        curX += one.x;
+        curY += one.y;
+        vertex(curX, curY);
+        // quadraticVertex(curX+one.x2, curY+one.y2, curX, curY);
+        break;
+      case 'Z':
+        if( i != data.length-1 ){
+          beginContour();
+        }
+        else{
+          endContour();
+          endShape(CLOSE);
+        }
+        break;
+      default:
+        print(one.code);
+    }
+  }
 }
 
 function doSnap(path, value, x, y) {
