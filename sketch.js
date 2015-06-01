@@ -8,7 +8,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(240, 120);
+  createCanvas(250, 120);
   snapX = 0;
   snapY = 0;
   snapDistance = 1;
@@ -18,10 +18,10 @@ function setup() {
   noCursor();
   noStroke();
 
-  background(237, 34, 93); //#ed225d, 237, 34, 93
+  background(255); //#ed225d, 237, 34, 93
 
-  fill(255);
-  drawSVGData(logoJSON);
+  fill(237, 34, 93);
+  drawSVG(logoJSON);
 }
 
 function draw() {
@@ -51,9 +51,18 @@ function draw() {
   // path.draw(this.drawingContext);
 }
 
-function drawSVGData(data)
+function drawSVG(data)
 {
-  var curX, curY;
+  for(var i=0; i<data.length; i++)
+  {
+    drawSVGPath(data[i]);
+  }
+}
+
+function drawSVGPath(data)
+{
+  var curX, curY, ctrX, ctrY;
+  var clipStart = false;
   for( var i=0; i<data.length; i++ ){
     var one = data[i];
     switch (one.code) {
@@ -61,6 +70,16 @@ function drawSVGData(data)
         if(i == 0){
           beginShape();
         }
+        curX = one.x;
+        curY = one.y;
+        vertex(curX, curY);
+        break;
+      case 'l':
+        curX += one.x;
+        curY += one.y;
+        vertex(curX, curY);
+        break;
+      case 'L':
         curX = one.x;
         curY = one.y;
         vertex(curX, curY);
@@ -82,23 +101,25 @@ function drawSVGData(data)
         vertex(curX, curY);
         break;
       case 'c':
+        ctrX = curX+one.x2;
+        ctrY = curY+one.y2;
         bezierVertex(curX+one.x1, curY+one.y1, curX+one.x2, curY+one.y2, curX+=one.x, curY+=one.y);
         break;
       case 'C':
-        bezierVertex(one.x1, one.y1, one.x2, one.y2, curX=one.x, curY=one.y);
+        bezierVertex(one.x1, one.y1, ctrX=one.x2, ctrY=one.y2, curX=one.x, curY=one.y);
         break;
       case 's':
-        curX += one.x;
-        curY += one.y;
-        vertex(curX, curY);
-        // quadraticVertex(curX+one.x2, curY+one.y2, curX, curY);
+        bezierVertex(curX*2-ctrX, curY*2-ctrY, ctrX=curX+one.x2, ctrY=curY+one.y2, curX+=one.x, curY+=one.y);
         break;
       case 'Z':
         if( i != data.length-1 ){
           beginContour();
+          clipStart = true;
         }
         else{
-          endContour();
+          if(clipStart){
+            endContour();
+          }
           endShape(CLOSE);
         }
         break;
