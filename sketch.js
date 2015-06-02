@@ -6,7 +6,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(250, 120);
+  createCanvas(200, 120);
   snapX = 0;
   snapY = 0;
   snapDistance = 1;
@@ -16,14 +16,14 @@ function setup() {
   noCursor();
   noStroke();
   fill(237, 34, 93);
-  logoPaths = toAbsoluteSVG(logoJSON);
+  logoPaths = toAbsoluteSVG(logoJSON, 0.78);
 }
 
 function draw() {
   clear();
   if (mouseX < width && mouseX > 0 && mouseY < height && mouseY > 0) {
     if (snapDistance == 1)
-      snapDistance = int(random(14.5, 24.5));
+      snapDistance = int(random(12.5, 18.5));
     if (pmouseX < mouseX) {
       increment = -1;
     } else if (pmouseX > mouseX) {
@@ -95,7 +95,7 @@ function snap(v, distance, strength) {
  *
  */
 
-function toAbsoluteSVG(data) {
+function toAbsoluteSVG(data, scale) {
   var results = [];
   for (var i = 0; i < data.length; i++) {
     var letter = [];
@@ -106,65 +106,65 @@ function toAbsoluteSVG(data) {
       switch (one.code) {
         case 'M':
           command.code = 'M';
-          command.x = curX = one.x;
-          command.y = curY = one.y;
+          command.x = curX = one.x * scale;
+          command.y = curY = one.y * scale;
           break;
         case 'l':
           command.code = 'L';
-          command.x = curX += one.x;
-          command.y = curY += one.y;
+          command.x = curX += one.x * scale;
+          command.y = curY += one.y * scale;
           break;
         case 'L':
           command.code = 'L';
-          command.x = curX = one.x;
-          command.y = curY = one.y;
+          command.x = curX = one.x * scale;
+          command.y = curY = one.y * scale;
           break;
         case 'v':
           command.code = 'L';
           command.x = curX;
-          command.y = curY += one.y;
+          command.y = curY += one.y * scale;
           break;
         case 'V':
           command.code = 'L';
           command.x = curX;
-          command.y = curY = one.y;
+          command.y = curY = one.y * scale;
           break;
         case 'h':
           command.code = 'L';
-          command.x = curX += one.x;
+          command.x = curX += one.x * scale;
           command.y = curY;
           break;
         case 'H':
           command.code = 'L';
-          command.x = curX = one.x;
+          command.x = curX = one.x * scale;
           command.y = curY;
           break;
         case 'c':
           command.code = 'C';
-          command.x1 = curX + one.x1;
-          command.y1 = curY + one.y1;
-          command.x2 = ctrX = curX + one.x2;
-          command.y2 = ctrY = curY + one.y2;
-          command.x = curX += one.x;
-          command.y = curY += one.y;
+          command.x1 = curX + one.x1 * scale;
+          command.y1 = curY + one.y1 * scale;
+          command.x2 = ctrX = curX + one.x2 * scale;
+          command.y2 = ctrY = curY + one.y2 * scale;
+          command.x = curX += one.x * scale;
+          command.y = curY += one.y * scale;
           break;
         case 'C':
           command.code = 'C';
-          command.x1 = one.x1;
-          command.y1 = one.y1;
-          command.x2 = ctrX = one.x2;
-          command.y2 = ctrY = one.y2;
-          command.x = curX = one.x;
-          command.y = curY = one.y;
+          command.x1 = one.x1 * scale;
+          command.y1 = one.y1 * scale;
+          command.x2 = ctrX = one.x2 * scale;
+          command.y2 = ctrY = one.y2 * scale;
+          command.x = curX = one.x * scale;
+          command.y = curY = one.y * scale;
           break;
         case 's':
           command.code = 'C';
           command.x1 = curX * 2 - ctrX;
           command.y1 = curY * 2 - ctrY;
-          command.x2 = ctrX = curX + one.x2;
-          command.y2 = ctrY = curY + one.y2;
-          command.x = curX += one.x;
-          command.y = curY += one.y;
+          command.x2 = ctrX = curX + one.x2 * scale;
+          command.y2 = ctrY = curY + one.y2 * scale;
+          command.x = curX += one.x * scale;
+          command.y = curY += one.y * scale;
           break;
         case 'Z':
           command.code = 'Z';
